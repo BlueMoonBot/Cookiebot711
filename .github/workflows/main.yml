@@ -44,7 +44,7 @@ jobs:
           # Target Repository IDs (Double-check that your first space is exactly named like this)
           SPACES = [
           
-              "Hectozar/CBot/"
+              "Hectozar/CBot"
 
           ]
 
