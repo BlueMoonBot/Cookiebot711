@@ -1,0 +1,115 @@
+name: "🌌 Hyperion-Class Immortal Engine"
+
+on:
+  schedule:
+    # Runs at minute :23 every 4 hours to dodge high-volume global cron traffic delays
+    - cron: '23 */4 * * *'
+  workflow_dispatch: # Allows instant manual click-to-run execution
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  immortal-sustain:
+    name: "Zero-Failure Sustainment Core"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: "Initialize Python & Native Platform Dependencies"
+        run: |
+          echo "🤖 Provisioning environment components..."
+          sudo apt-get update -yq && sudo apt-get install -yq curl jq
+          pip install --upgrade pip
+          pip install huggingface_hub
+
+      - name: "Execute Native Hugging Face Space Wake/Sustain Core"
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        shell: python
+        run: |
+          import os
+          import sys
+          from huggingface_hub import HfApi
+
+          # Fetch authenticated environment token
+          hf_token = os.getenv("HF_TOKEN")
+          if not hf_token:
+              print("❌ Critical Error: HF_TOKEN missing from GitHub Secrets.")
+              sys.exit(1)
+
+          api = HfApi(token=hf_token)
+
+          # Target Repository IDs (Double-check that your first space is exactly named like this)
+          SPACES = [
+          
+              "Hectozar/CBot/
+
+          ]
+
+          print("🚀 Initiating Hugging Face Cluster Administration...")
+          
+          for space in SPACES:
+              print("-" * 54)
+              print(f"🌐 Target Node: {space}")
+              try:
+                  # This uses the official SDK to fetch status and force a backend wake/restart command
+                  runtime = api.get_space_runtime(repo_id=space)
+                  print(f"📊 Current Stage Status: {runtime.stage}")
+                  
+                  # Triggers the backend cluster to spin up, bypasses edge proxy, keeps active containers sustained
+                  api.restart_space(repo_id=space)
+                  print(f"✅ Success: Persistent wake/sustain command broadcasted cleanly.")
+                  
+              except Exception as e:
+                  print(f"❌ Error communicating with target node: {e}")
+                  print("ℹ️ Check your fine-grained token parameters or confirm the exact spelling of your Space ID.")
+
+      - name: "Hard-Reset GitHub Inactivity Clock via REST API"
+        env:
+          HUMAN_TOKEN: ${{ secrets.HUMAN_TOKEN }}
+        run: |
+          echo "======================================================"
+          echo "🔄 Commencing High-Impact GitHub Activity Injection..."
+          echo "======================================================"
+          
+          # 1. Fetch current file state to prevent tree conflict anomalies
+          FILE_DATA=$(curl -s -H "Authorization: token $HUMAN_TOKEN" \
+            "https://api.github.com/repos/${{ github.repository }}/contents/bot_pulse.txt?ref=${{ github.ref_name }}")
+          
+          CURRENT_SHA=$(echo "$FILE_DATA" | jq -r '.sha // empty')
+          
+          # Generate clean base64 data payloads
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          CONTENT_BASE64=$(echo -n "Hyperion Engine Pulse: $TIMESTAMP" | base64 | tr -d '\n\r')
+          
+          # Construct isolation payload mapping directly for the REST engine
+          if [ -z "$CURRENT_SHA" ]; then
+            JSON_PAYLOAD=$(jq -n \
+              --arg msg "chore(keepalive): initialize engine pulse [skip ci]" \
+              --arg b64 "$CONTENT_BASE64" \
+              --arg branch "${{ github.ref_name }}" \
+              '{message: $msg, content: $b64, branch: $branch}')
+          else
+            JSON_PAYLOAD=$(jq -n \
+              --arg msg "chore(keepalive): immortal keepalive sync $TIMESTAMP [skip ci]" \
+              --arg b64 "$CONTENT_BASE64" \
+              --arg sha "$CURRENT_SHA" \
+              --arg branch "${{ github.ref_name }}" \
+              '{message: $msg, content: $b64, sha: $sha, branch: $branch}')
+          fi
+
+          # 2. Update via user-identity token to wipe out the 60-day cron limit
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X PUT \
+            -H "Authorization: token $HUMAN_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -d "$JSON_PAYLOAD" \
+            "https://api.github.com/repos/${{ github.repository }}/contents/bot_pulse.txt")
+
+          if [ "$RESPONSE" = "200" ] || [ "$RESPONSE" = "201" ]; then
+            echo "🌌 Success: GitHub API activity injection complete. 60-day clock reset!"
+          else
+            echo "🚨 Critical: GitHub Database rejected the write-buffer. Status: $RESPONSE"
+            exit 1
+          fi
